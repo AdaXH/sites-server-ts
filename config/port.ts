@@ -4,7 +4,7 @@ export default {
     port: 3000,
   },
   production: {
-    host: 'mongodb://root:zAenx5erdyGqKdDYWWpId7Ns4VysommwWSjrmyLL@oktczumnwrwh.mongodb.sae.sina.com.cn:10184',
+    host: 'online host',
     port: 5050,
   },
 };
