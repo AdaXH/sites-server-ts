@@ -21,11 +21,11 @@
 - ...
 
 ## 文件目录
-- controller: 路由控制器
-- service: 业务逻辑层
-- entity: 实体类目录
-- common: 一些手写的工具（注解，DI等）
-- config: 一些启动配置
+- controller :  路由控制器
+- service :     业务逻辑层
+- entity :      实体类目录
+- common :      一些手写的工具（注解，DI等）
+- config :      一些启动配置
 
 目前已经重写完成的功能/模块：
 - [x] 用户模块
