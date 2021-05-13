@@ -1,0 +1,35 @@
+{
+  "scripts": {
+    "start": "node dist/app.js  --env=production",
+    "dev": "nodemon app.ts --env=development",
+    "lint": "eslint -c .eslintrc.json --ext .ts {service/**/*.ts,controller/*.ts,common/*.ts}",
+    "build": "tsc && tsc-alias"
+  },
+  "dependencies": {
+    "@typegoose/typegoose": "^7.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.13.1",
+    "koa-body": "^4.2.0",
+    "koa-json": "^2.0.2",
+    "koa-router": "^10.0.0",
+    "mongoose": "^5.10.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/koa": "^2.13.1",
+    "@types/koa-router": "^7.4.2",
+    "@types/mongoose": "^5.10.5",
+    "@typescript-eslint/eslint-plugin": "^4.23.0",
+    "@typescript-eslint/parser": "^4.23.0",
+    "eslint": "^7.26.0",
+    "eslint-plugin-typescript": "^0.14.0",
+    "prettier": "^2.3.0",
+    "reflect-metadata": "^0.1.13",
+    "ts-node": "^9.1.1",
+    "tsc-alias": "^1.2.10",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.2.3",
+    "typescript-eslint-parser": "^22.0.0"
+  }
+}
