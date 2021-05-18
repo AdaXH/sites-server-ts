@@ -19,27 +19,14 @@ export default class UserController {
     return this.userService.queryByUserId(userId);
   }
 
-  @PostMapping('/register')
-  public async register(@request() body: User): Promise<CommonObj> {
-    return this.userService.register(body);
-  }
-
-  @PostMapping('/login')
-  public async login(@request() body: User): Promise<CommonObj> {
-    return this.userService.login(body);
+  @PostMapping('/add-user')
+  public async insertUser(@request() body: User): Promise<CommonObj> {
+    return this.userService.insertUser(body);
   }
 
   @GetMapping('/queryMyBasicInfo/:userId')
   @TokenValidate()
   public async queryMyBasicInfo(@param('userId') userId: string): Promise<CommonObj> {
     return this.userService.queryMyBasicInfo(userId);
-  }
-
-  @PostMapping('/test-upd/:userId')
-  public async testUpd(
-    @param('userId') userId: string,
-    @request() body: CommonObj,
-  ): Promise<CommonObj> {
-    return this.userService.updateUser(userId, body);
   }
 }

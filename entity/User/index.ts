@@ -13,25 +13,25 @@ class UserDTO implements User {
   /**
    * 用户名
    */
-  @Prop({ required: true, maxlength: 20, minlength: 3 })
+  @Prop({ required: true })
   name: string;
 
   /**
    * 密码
    */
-  @Prop({ required: true, maxlength: 200, minlength: 10 })
+  @Prop({ required: true })
   password: string;
 
   /**
    * 头像
    */
-  @Prop({ maxlength: 500 })
+  @Prop()
   avatar?: string;
 
   /**
    * 邮箱
    */
-  @Prop({ maxlength: 100 })
+  @Prop()
   email?: string;
 
   /**
@@ -49,7 +49,7 @@ class UserDTO implements User {
   /**
    * 个人简介
    */
-  @Prop({ default: '我懒得写简介（其实这句话是默认的）', maxlength: 100 })
+  @Prop()
   myDesc?: string;
 
   /**
@@ -97,16 +97,24 @@ class UserDTO implements User {
   setting?: SettingDTO;
 
   // 查询基本信息
-  public queryMyBasicInfo(): User {
+  public queryMyBasicInfo(): CommonObj {
     const { avatar, name, gender, myDesc, qqUserId, userId } = this;
-    return { avatar, name, gender, myDesc, qqUserId, userId } as User;
+    return { avatar, name, gender, myDesc, qqUserId, userId };
+  }
+
+  public setMySites(mySites: SiteInfoDTO[]): void {
+    this.mySites = mySites;
+  }
+
+  public setMyFavorite(myFavorite: SiteInfoDTO[]): void {
+    this.myFavorite = myFavorite;
   }
 }
 
 export default getModelForClass(UserDTO, {
   options: { customName: 'test_users' },
   schemaOptions: {
-    timestamps: { createdAt: 'gmtCreate', updatedAt: 'gmtUpdate' },
+    timestamps: { createdAt: 'gmtCreate', updatedAt: 'gmtModified' },
     versionKey: 'version',
   },
 });

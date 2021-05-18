@@ -19,11 +19,6 @@ export function parseToken(authorization: string): unknown {
   }
 }
 
-/**
- * 根据验证选项验证token
- * @param validateParam
- * @param authorization
- */
 export async function validateToken(
   validateParam: Validate,
   authorization: string,
@@ -41,30 +36,5 @@ export async function validateToken(
   }
   if (needSuperAdmin && !superAdmin) {
     throw new Error('账号无权限');
-  }
-}
-
-/**
- * 更新用户信息，以下字段不能带入body
- * @param updParam
- */
-export function validateUpdUserParam(updParam: CommonObj): void {
-  if ('admin' in updParam) {
-    delete updParam.admin;
-  }
-  if ('superAdmin' in updParam) {
-    delete updParam.superAdmin;
-  }
-  if ('userId' in updParam) {
-    delete updParam.userId;
-  }
-  if ('_id' in updParam) {
-    delete updParam._id;
-  }
-  if ('mySites' in updParam) {
-    delete updParam.mySites;
-  }
-  if ('myFavorite' in updParam) {
-    delete updParam.myFavorite;
   }
 }

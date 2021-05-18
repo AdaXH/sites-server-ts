@@ -4,4 +4,10 @@ type CommonObj = {
   [x?: string]: any;
 };
 
-type SITETYPE = 'technology' | 'life' | 'info' | 'others';
+interface CommonCtx extends Context {
+  request: {
+    body: CommonObj;
+  };
+}
+
+type SiteType = 'technology' | 'life' | 'info' | 'others';

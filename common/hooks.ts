@@ -10,6 +10,7 @@ import {
   BODY_META_KEY,
   TOKEN_META_KEY_PREFIX,
   validateToken,
+  CTX_META_KEY_PREFIX,
 } from '.';
 import { CommonResponse } from './CommonResponse';
 import { CommonObj } from '@/typings';
@@ -23,6 +24,7 @@ export async function registerRoute(
   const { dir } = config || {};
   const list = await fs.readdirSync(`${dir}/controller`);
   list.forEach(async item => {
+    if (item === 'BaseController.ts') return;
     const Controller = await import(`${dir}/controller/${item}`);
     const instance = new Controller.default();
     const property = Object.getPrototypeOf(instance);
@@ -40,6 +42,7 @@ export async function registerRoute(
             headers: { authorization },
           } = ctx;
           const target = property[fn];
+          instance.setContext(ctx);
           // 获取param参数信息元数据 - restful
           const paramData = Reflect.getMetadata(PARAM_META_KEY, target);
           const args = [];
@@ -73,6 +76,11 @@ export async function registerRoute(
           if (validateParam) {
             await validateToken(validateParam, authorization);
           }
+          // 注入ctx
+          const CtxParam = Reflect.getMetadata(CTX_META_KEY_PREFIX, target);
+          if (CtxParam >= 0) {
+            args[CtxParam] = ctx;
+          }
           const result: CommonObj = await property[fn](...args);
           const response: CommonResponse<CommonObj> = CommonResponse.success(result);
           ctx.body = response;
@@ -87,7 +95,7 @@ export async function registerRoute(
   return app;
 }
 
-export function connectDb(app: Application): void {
+export function startServer(app: Application): void {
   const { env } = app;
   const { host, port } = Host[env];
   const db = new Database(host);

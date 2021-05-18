@@ -1,10 +1,6 @@
 import 'tsconfig-paths/register';
 import Koa from 'koa';
-import {
-  registerRoute,
-  registerBasicPlugin as usePlugin,
-  connectDb as startServer,
-} from './common';
+import { registerRoute, registerBasicPlugin as usePlugin, startServer } from './common';
 import 'reflect-metadata';
 // import tsConfig from './tsconfig.json';
 
