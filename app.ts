@@ -1,17 +1,12 @@
 import 'tsconfig-paths/register';
-import Koa from 'koa';
-import { registerRoute, registerBasicPlugin as usePlugin, startServer } from './common';
 import 'reflect-metadata';
-// import tsConfig from './tsconfig.json';
+import Server from './class/Server';
+import serverConfig from './config/port';
 
-// When path registration is no longer needed
-const app = new Koa();
+const server = new Server({
+  controllerPath: `${__dirname}/controller`,
+  rootPath: __dirname,
+  serverConfig,
+});
 
-// register pligun
-usePlugin(app, { dir: __dirname });
-
-// register router
-registerRoute(app, { dir: __dirname });
-
-// start server, connect database
-startServer(app);
+server.startServer();

@@ -1,8 +1,21 @@
+import { Context } from 'koa';
+import * as fs from 'fs';
+import BodyParser from 'koa-body';
+import Json from 'koa-json';
+import jwt from 'jsonwebtoken';
 import User from '@/entity/User';
 import { CommonObj } from '@/typings';
-import jwt from 'jsonwebtoken';
-import { BizError } from '.';
-import { Validate } from './diMethods';
+import {
+  BizError,
+  BODY_META_KEY,
+  CommonResponse,
+  CTX_META_KEY_PREFIX,
+  PARAM_META_KEY,
+  QUERY_ITEM_META_KEY,
+  QUERY_META_KEY,
+  TOKEN_META_KEY_PREFIX,
+} from '.';
+import { Validate } from './dependencyInject';
 
 function getJWTPayload(token) {
   // 验证并解析JWT
@@ -19,6 +32,11 @@ export function parseToken(authorization: string): unknown {
   }
 }
 
+/**
+ * 校验token
+ * @param validateParam
+ * @param authorization
+ */
 export async function validateToken(
   validateParam: Validate,
   authorization: string,
@@ -37,4 +55,105 @@ export async function validateToken(
   if (needSuperAdmin && !superAdmin) {
     throw new Error('账号无权限');
   }
+}
+
+/**
+ * 加载controller文件夹
+ * @param controllerPath
+ * @returns
+ */
+export async function loadController(controllerPath: string): Promise<unknown[]> {
+  const list = await fs.readdirSync(controllerPath);
+  const controllers = [];
+  await list.forEach(async item => {
+    if (item === 'BaseController.ts') return;
+    const Controller = await import(`${controllerPath}/${item}`);
+    const instance = new Controller.default();
+    const property = Object.getPrototypeOf(instance);
+    const fnNames = Object.getOwnPropertyNames(property).filter(
+      item => item !== 'constructor' && typeof property[item] === 'function',
+    );
+    fnNames.forEach(fn => {
+      const { method, url } = Reflect.getMetadata(fn, property);
+      controllers.push({
+        method: method.toLowerCase(),
+        url,
+        route: async (ctx: Context) => {
+          try {
+            const {
+              params,
+              query,
+              request: { body },
+              headers: { authorization },
+            } = ctx;
+            const target = property[fn];
+            // 获取param参数信息元数据 - restful
+            const paramData = Reflect.getMetadata(PARAM_META_KEY, target);
+            const args = [];
+            // 获取param元数据 - restful
+            if (paramData) {
+              const { paramName, index } = paramData;
+              args[index] = params[paramName];
+            }
+            // 获取query参数obj元数据
+            const queryObjectIndex = Reflect.getMetadata(QUERY_META_KEY, target);
+            if (queryObjectIndex) {
+              args[queryObjectIndex] = query;
+            }
+            // 获取query参数元数据
+            const queryItem = Reflect.getMetadata(QUERY_ITEM_META_KEY, target);
+            if (queryItem) {
+              const { index, queryItemName } = queryItem;
+              args[index] = query[queryItemName];
+            }
+            // 获取request元数据
+            const requestIndex = Reflect.getMetadata(BODY_META_KEY, target);
+            if (requestIndex >= 0) {
+              args[requestIndex] = body;
+            }
+            // 获取验证token元数据
+            const validateParam = Reflect.getMetadata(
+              `${TOKEN_META_KEY_PREFIX}${fn}`,
+              target,
+            );
+            // 校验token
+            if (validateParam) {
+              await validateToken(validateParam, authorization);
+            }
+            // 注入ctx
+            const CtxParam = Reflect.getMetadata(CTX_META_KEY_PREFIX, target);
+            if (CtxParam >= 0) {
+              args[CtxParam] = ctx;
+            }
+            const result: CommonObj = await property[fn](...args);
+            const response: CommonResponse<CommonObj> = CommonResponse.success(result);
+            ctx.body = response;
+          } catch (error) {
+            ctx.body = CommonResponse.error(error);
+          }
+        },
+      });
+    });
+  });
+  return controllers;
+}
+
+export function getEnv(): string {
+  const args = process.argv;
+  return args[args.length - 1].replace(/--env=/, '');
+}
+
+/**
+ * 加载插件
+ * @returns
+ */
+export function loadPlugin(): any[] {
+  return [
+    BodyParser({
+      jsonLimit: '9mb',
+      formLimit: '9mb',
+      textLimit: '9mb',
+    }),
+    new Json(),
+  ];
 }
