@@ -1,4 +1,4 @@
-import { BizError, ErrorCodeEnum } from '@/common';
+import { BizError, ErrorCodeEnum } from '@/class';
 import UserInstance from '@/entity/User';
 import { User } from '@/entity/User/interface';
 import { CommonObj } from '@/typings';

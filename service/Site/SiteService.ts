@@ -1,5 +1,6 @@
-import { BizError, ErrorCodeEnum, MAP_SITE_DTO } from '@/common';
+import { BizError, ErrorCodeEnum } from '@/class';
 import { BaseSite } from '@/entity/Site/interface';
+import { MAP_SITE_DTO } from '@/common';
 import SiteServiceImpl, { querySitesDTO, querySiteInfoDTO } from './SiteServiceImpl';
 
 export default class SiteService implements SiteServiceImpl {

@@ -1,21 +1,17 @@
 import mongoose from 'mongoose';
 
-const MAX_CONNECT_TIME = 100;
+export class Database {
+  static max = 100;
 
-export default class Datebase {
   constructor(host: string) {
     this.host = host;
   }
   private host: string;
   private time = 0;
 
-  async init(): Promise<Error | void> {
-    try {
-      await mongoose.connect(this.host);
-      console.log('connected db');
-    } catch (error) {
-      throw new Error(error);
-    }
+  async init(): Promise<void> {
+    await mongoose.connect(this.host);
+    console.log('connected db');
   }
 
   async connect(): Promise<void> {
@@ -24,7 +20,7 @@ export default class Datebase {
     } catch (error) {
       console.log('db error ', error);
       this.time += 1;
-      if (this.time > MAX_CONNECT_TIME) {
+      if (this.time > Database.max) {
         console.log('max connect times');
         return;
       }

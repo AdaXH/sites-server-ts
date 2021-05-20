@@ -1,16 +1,19 @@
-import Application from 'koa';
-import { loadController, getEnv, loadPlugin } from '@/common';
+import Application, { Context, DefaultContext, ParameterizedContext } from 'koa';
+import { loadController, getEnv, loadPlugin, loadMiddleware } from '@/common';
 import { CommonObj } from '@/typings';
-import Database from '@/common/db';
+import { Database } from '.';
 import Router from 'koa-router';
+import { IncomingMessage, ServerResponse } from 'http';
 
-export default class Server {
+export class Server extends Application {
   private config: CommonObj = {};
   private app: Application;
   private controllers: unknown[];
   private router: Router = new Router();
   private plugins: any[];
+  private middlewares: any[];
   constructor(config: CommonObj) {
+    super();
     this.config = config;
     this.app = new Application();
     this.plugins = loadPlugin();
@@ -19,8 +22,18 @@ export default class Server {
   async init(): Promise<void> {
     this.app.env = getEnv();
     this.registerPlugin();
+    this.middlewares = await loadMiddleware(this.config.middlewarePath);
     this.controllers = await loadController(this.config.controllerPath);
+    this.useMiddleware();
     this.registerController();
+  }
+
+  createContext(
+    req: IncomingMessage,
+    res: ServerResponse,
+  ): ParameterizedContext<any, DefaultContext, unknown> {
+    const context = super.createContext(req, res);
+    return context as Context;
   }
 
   /**
@@ -42,12 +55,20 @@ export default class Server {
   }
 
   /**
+   * 注册中间件
+   */
+  useMiddleware(): void {
+    this.middlewares.forEach(async item => {
+      const middleware = await item;
+      this.app.use(middleware);
+    });
+  }
+  /**
    * 启动服务
-   * @param serverConfig
    */
   startServer(): void {
     const { env } = this.app;
-    const { host, port } = this.config.serverConfig[env];
+    const { host, port } = this.config.bootConfig[env];
     const db = new Database(host);
     db.connect();
     this.app.listen(port);

@@ -1,15 +1,14 @@
 import { Context } from 'koa';
 import * as fs from 'fs';
 import BodyParser from 'koa-body';
+// import Logger from 'koa-logger';
 import Json from 'koa-json';
 import jwt from 'jsonwebtoken';
 import User from '@/entity/User';
 import { CommonObj } from '@/typings';
+import { CommonResponse, BizError } from '@/class';
 import {
-  BizError,
   BODY_META_KEY,
-  CommonResponse,
-  CTX_META_KEY_PREFIX,
   PARAM_META_KEY,
   QUERY_ITEM_META_KEY,
   QUERY_META_KEY,
@@ -120,11 +119,6 @@ export async function loadController(controllerPath: string): Promise<unknown[]>
             if (validateParam) {
               await validateToken(validateParam, authorization);
             }
-            // 注入ctx
-            const CtxParam = Reflect.getMetadata(CTX_META_KEY_PREFIX, target);
-            if (CtxParam >= 0) {
-              args[CtxParam] = ctx;
-            }
             const result: CommonObj = await property[fn](...args);
             const response: CommonResponse<CommonObj> = CommonResponse.success(result);
             ctx.body = response;
@@ -138,6 +132,10 @@ export async function loadController(controllerPath: string): Promise<unknown[]>
   return controllers;
 }
 
+/**
+ * 获取env
+ * @return {string}
+ */
 export function getEnv(): string {
   const args = process.argv;
   return args[args.length - 1].replace(/--env=/, '');
@@ -155,5 +153,14 @@ export function loadPlugin(): any[] {
       textLimit: '9mb',
     }),
     new Json(),
+    // Logger(),
   ];
+}
+
+export async function loadMiddleware(middlewarePath: string): Promise<any> {
+  const list = await fs.readdirSync(middlewarePath);
+  return await list.map(async item => {
+    const middlewareFile = await import(`${middlewarePath}/${item}`);
+    return middlewareFile.default;
+  });
 }
