@@ -1,30 +1,33 @@
 import Application, { Context, DefaultContext, ParameterizedContext } from 'koa';
 import { loadController, getEnv, loadPlugin, loadMiddleware } from '@/common';
-import { CommonObj } from '@/typings';
+import { ServerConfig } from '@/typings';
 import { Database } from '.';
 import Router from 'koa-router';
 import { IncomingMessage, ServerResponse } from 'http';
 
 export class Server extends Application {
-  private config: CommonObj = {};
+  private config: ServerConfig;
   private app: Application;
   private controllers: unknown[];
   private router: Router = new Router();
-  private plugins: any[];
-  private middlewares: any[];
-  constructor(config: CommonObj) {
+  private plugins: VoidFunction[];
+  private middlewares: Promise<VoidFunction>[];
+
+  constructor(config: ServerConfig) {
     super();
     this.config = config;
     this.app = new Application();
-    this.plugins = loadPlugin();
     this.init();
   }
+
   async init(): Promise<void> {
     this.app.env = getEnv();
-    this.registerPlugin();
     this.middlewares = await loadMiddleware(this.config.middlewarePath);
     this.controllers = await loadController(this.config.controllerPath);
-    this.useMiddleware();
+    this.plugins = await loadPlugin();
+
+    await this.useMiddleware();
+    this.registerPlugin();
     this.registerController();
   }
 
@@ -57,12 +60,13 @@ export class Server extends Application {
   /**
    * 注册中间件
    */
-  useMiddleware(): void {
+  async useMiddleware(): Promise<void> {
     this.middlewares.forEach(async item => {
       const middleware = await item;
       this.app.use(middleware);
     });
   }
+
   /**
    * 启动服务
    */
@@ -72,6 +76,7 @@ export class Server extends Application {
     const db = new Database(host);
     db.connect();
     this.app.listen(port);
+    // eslint-disable-next-line no-console
     console.log('server on ', port);
   }
 }

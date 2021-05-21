@@ -1,12 +1,11 @@
 import { Context } from 'koa';
 import * as fs from 'fs';
 import BodyParser from 'koa-body';
-// import Logger from 'koa-logger';
 import Json from 'koa-json';
 import jwt from 'jsonwebtoken';
 import User from '@/entity/User';
 import { CommonObj } from '@/typings';
-import { CommonResponse, BizError } from '@/class';
+import { CommonResponse, BizError, ErrorCodeEnum } from '@/class';
 import {
   BODY_META_KEY,
   PARAM_META_KEY,
@@ -24,10 +23,10 @@ function getJWTPayload(token) {
 export function parseToken(authorization: string): unknown {
   try {
     const tokenParse = getJWTPayload(authorization);
-    if (!tokenParse) throw new Error('你还没有登陆噢~');
+    if (!tokenParse) throw new BizError('你还没有登陆噢~', ErrorCodeEnum.NEED_LOGIN);
     return tokenParse;
   } catch (error) {
-    throw new BizError('鉴权失败，请重新登录', '-1', error);
+    throw new BizError('鉴权失败，请重新登录', ErrorCodeEnum.PERMISSION_DENIED, error);
   }
 }
 
@@ -45,14 +44,14 @@ export async function validateToken(
   const { userId } = tokenObj;
   const user = await User.findOne({ userId });
   if (!user) {
-    throw new Error('用户已不存在');
+    throw new BizError('用户已不存在', ErrorCodeEnum.NOT_FOUND);
   }
   const { admin, superAdmin } = user;
   if (needAdmin && !admin) {
-    throw new Error('账号无权限');
+    throw new BizError('账号无权限', ErrorCodeEnum.PERMISSION_DENIED);
   }
   if (needSuperAdmin && !superAdmin) {
-    throw new Error('账号无权限');
+    throw new BizError('账号无权限', ErrorCodeEnum.PERMISSION_DENIED);
   }
 }
 
@@ -145,7 +144,7 @@ export function getEnv(): string {
  * 加载插件
  * @returns
  */
-export function loadPlugin(): any[] {
+export function loadPlugin(): VoidFunction[] {
   return [
     BodyParser({
       jsonLimit: '9mb',
@@ -153,11 +152,16 @@ export function loadPlugin(): any[] {
       textLimit: '9mb',
     }),
     new Json(),
-    // Logger(),
   ];
 }
 
-export async function loadMiddleware(middlewarePath: string): Promise<any> {
+/**
+ * 加载中间价
+ * @param middlewarePath
+ */
+export async function loadMiddleware(
+  middlewarePath: string,
+): Promise<Promise<VoidFunction>[]> {
   const list = await fs.readdirSync(middlewarePath);
   return await list.map(async item => {
     const middlewareFile = await import(`${middlewarePath}/${item}`);

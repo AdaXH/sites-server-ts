@@ -2,7 +2,7 @@
   "scripts": {
     "start": "node dist/app.js  --env=production",
     "dev": "nodemon app.ts --env=development",
-    "lint": "eslint -c .eslintrc.json --ext .ts {service/**/*.ts,controller/*.ts,common/*.ts}",
+    "lint": "eslint -c .eslintrc.json --ext **/*.ts",
     "build": "tsc && tsc-alias"
   },
   "dependencies": {
@@ -11,15 +11,15 @@
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
     "koa-json": "^2.0.2",
-    "koa-logger": "^3.2.1",
     "koa-router": "^10.0.0",
+    "log4js": "^6.3.0",
     "mongoose": "^5.10.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.1",
     "@types/koa": "^2.13.1",
-    "@types/koa-logger": "^3.1.1",
     "@types/koa-router": "^7.4.2",
+    "@types/log4js": "^2.3.5",
     "@types/mongoose": "^5.10.5",
     "@typescript-eslint/eslint-plugin": "^4.23.0",
     "@typescript-eslint/parser": "^4.23.0",
