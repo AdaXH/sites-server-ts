@@ -13,25 +13,25 @@ class UserDTO implements User {
   /**
    * 用户名
    */
-  @Prop({ required: true })
+  @Prop({ required: true, minlength: 3, maxlength: 15 })
   name: string;
 
   /**
    * 密码
    */
-  @Prop({ required: true })
+  @Prop({ required: true, minlength: 6, maxlength: 20 })
   password: string;
 
   /**
    * 头像
    */
-  @Prop()
+  @Prop({ maxlength: 100 })
   avatar?: string;
 
   /**
    * 邮箱
    */
-  @Prop()
+  @Prop({ maxlength: 50 })
   email?: string;
 
   /**
@@ -49,7 +49,7 @@ class UserDTO implements User {
   /**
    * 个人简介
    */
-  @Prop()
+  @Prop({ maxlength: 200 })
   myDesc?: string;
 
   /**
