@@ -14,6 +14,8 @@ import {
   TOKEN_META_KEY_PREFIX,
 } from '.';
 import { Validate } from './dependencyInject';
+import { logger } from './winston';
+import chalk from 'chalk';
 
 function getJWTPayload(token) {
   // 验证并解析JWT
@@ -73,6 +75,7 @@ export async function loadController(controllerPath: string): Promise<unknown[]>
     );
     fnNames.forEach(fn => {
       const { method, url } = Reflect.getMetadata(fn, property);
+      logger.info(`register route: ${chalk.blue(`[${method}]`)} ${chalk.green(url)} `);
       controllers.push({
         method: method.toLowerCase(),
         url,

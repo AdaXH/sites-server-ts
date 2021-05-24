@@ -1,11 +1,9 @@
-/* eslint-disable no-console */
-import { PostMapping, request } from '@/common';
-import { CommonObj } from '@/typings';
+import { PostMapping, TokenValidate } from '@/common';
 
 export default class Test {
-  @PostMapping('/test')
-  test(@request() body: CommonObj): CommonObj {
-    console.log('this', this);
-    return body;
+  @PostMapping('/reload-db')
+  @TokenValidate({ needSuperAdmin: true })
+  test(): void {
+    process.exit(0);
   }
 }

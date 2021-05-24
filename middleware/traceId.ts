@@ -8,7 +8,7 @@ export default async function (ctx: CommonObj, next: VoidFunction): Promise<void
     const { body } = ctx;
     const traceId = uuid();
     ctx.set('Trace-id', traceId);
-    ctx.body = { ...JSON.parse(body || '{}'), traceId };
+    ctx.body = { ...JSON.parse(body || '{}'), traceId, pid: process.pid };
   } catch (error) {
     ctx.body = CommonResponse.error(error);
   }

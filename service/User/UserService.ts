@@ -27,7 +27,7 @@ export default class UserService implements UserServiceImpl {
       throw new BizError('用户缺少参数：id', ErrorCodeEnum.REQUIRED_ARGUMENUT);
     }
 
-    const user = UserInstance.findOne({ userId }, { password: 0, _id: 0 });
+    const user = UserInstance.findOne({ userId }, { password: 0, _id: 0, __v: 0 });
     if (!user) {
       throw new BizError('用户不存在', ErrorCodeEnum.NOT_FOUND);
     }

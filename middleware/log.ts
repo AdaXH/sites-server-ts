@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
 import { CommonObj } from '@/typings';
 import log4js from 'log4js';
 import { Context } from 'koa';
+import { logger } from '@/common';
 
 log4js.configure({
   appenders: {
@@ -48,4 +48,7 @@ export default async function (ctx: Context, next: VoidFunction): Promise<void> 
   res: ${responseStr}
   `;
   targetLogger.fatal(log);
+  if (!success) {
+    logger.error(log);
+  }
 }

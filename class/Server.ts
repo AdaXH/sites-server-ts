@@ -1,7 +1,14 @@
 import Application, { Context, DefaultContext, ParameterizedContext } from 'koa';
-import { loadController, getEnv, loadPlugin, loadMiddleware } from '@/common';
+import {
+  loadController,
+  getEnv,
+  loadPlugin,
+  loadMiddleware,
+  logger,
+  PROCESS_EVENT,
+} from '@/common';
 import { ServerConfig } from '@/typings';
-import { Database } from '.';
+import { Database, DatabaseInstance, Process } from '.';
 import Router from 'koa-router';
 import { IncomingMessage, ServerResponse } from 'http';
 
@@ -12,16 +19,17 @@ export class Server extends Application {
   private router: Router = new Router();
   private plugins: VoidFunction[];
   private middlewares: Promise<VoidFunction>[];
+  private db: DatabaseInstance = new Database();
 
   constructor(config: ServerConfig) {
     super();
     this.config = config;
-    this.app = new Application();
-    this.init();
   }
 
   async init(): Promise<void> {
+    this.app = new Application();
     this.app.env = getEnv();
+
     this.middlewares = await loadMiddleware(this.config.middlewarePath);
     this.controllers = await loadController(this.config.controllerPath);
     this.plugins = await loadPlugin();
@@ -70,13 +78,23 @@ export class Server extends Application {
   /**
    * 启动服务
    */
-  startServer(): void {
-    const { env } = this.app;
-    const { host, port } = this.config.bootConfig[env];
-    const db = new Database(host);
-    db.connect();
-    this.app.listen(port);
-    // eslint-disable-next-line no-console
-    console.log('server on ', port);
+  async startServer(): Promise<void> {
+    new Process(async () => {
+      await this.init();
+      const { env } = this.app;
+      const { host, port } = this.config.bootConfig[env];
+      this.db.connect(host);
+      this.app.listen(port);
+      logger.info(`web server on ${port} at process: ${process.pid}`);
+    }, [
+      {
+        eventName: PROCESS_EVENT.RELOAD_DB,
+        callback: async () => {
+          const { host } = this.config.bootConfig[this.env];
+          await this.db.disConnect();
+          this.db.connect(host);
+        },
+      },
+    ]);
   }
 }

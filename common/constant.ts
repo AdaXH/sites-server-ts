@@ -28,3 +28,8 @@ type TYPE_SITE_DTO = {
 export const MAP_SITE_DTO: TYPE_SITE_DTO = {
   technology: TechnologySiteDTO as ReturnType,
 };
+
+export enum PROCESS_EVENT {
+  'CLOSE' = 'CLOSE',
+  'RELOAD_DB' = 'RELOAD_DB',
+}

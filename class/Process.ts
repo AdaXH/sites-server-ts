@@ -1,0 +1,65 @@
+import { logger } from '@/common';
+import cluster from 'cluster';
+import os from 'os';
+
+const cpus = os.cpus().length;
+
+export class Process {
+  private workers: WorkerFace[] = [];
+  private maxProcess: number = cpus;
+  private callback: VoidFunction;
+  private eventListener: eventFunction[];
+
+  constructor(callback: VoidFunction, eventListener: eventFunction[]) {
+    this.callback = callback;
+    this.eventListener = eventListener;
+    this.init();
+  }
+
+  init(): void {
+    if (cluster.isMaster) {
+      for (let i = 0; i < 1; i += 1) {
+        const worker = cluster.fork();
+        worker.on('message', arg => {
+          if (this.eventListener) {
+            this.eventListener.forEach(({ eventName, callback }) => {
+              if (arg?.eventName === eventName) {
+                logger.info(`event: ${eventName}`);
+                callback();
+              }
+            });
+          }
+        });
+        this.workers.push({
+          pid: worker.process.pid,
+          worker,
+        });
+      }
+      cluster.on('exit', (worker, code, sign) => {
+        const newWorker = cluster.fork();
+        logger.warning(`process exit whitd code: ${code}, sing: ${sign}, now loading`);
+        const newWorkes = this.workers
+          .filter(item => worker.process.pid !== item.pid)
+          .concat([
+            {
+              pid: newWorker.process.pid,
+              worker: newWorker,
+            },
+          ]);
+        this.workers = newWorkes;
+      });
+    } else {
+      this.callback();
+    }
+  }
+}
+
+interface WorkerFace {
+  pid?: number;
+  worker: Worker | unknown;
+}
+
+interface eventFunction {
+  eventName: string;
+  callback: (arg?: unknown) => void | Promise<unknown>;
+}
