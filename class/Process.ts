@@ -1,4 +1,5 @@
 import { logger } from '@/common';
+import { traceLogger } from '@/middleware/log';
 import cluster from 'cluster';
 import os from 'os';
 
@@ -20,6 +21,12 @@ export class Process {
     if (cluster.isMaster) {
       for (let i = 0; i < this.maxProcess; i += 1) {
         const worker = cluster.fork();
+        worker.process.stdout.on('data', function (chunk) {
+          traceLogger.fatal('worker ' + i + ': ' + chunk);
+        });
+        worker.process.stderr.on('data', function (chunk) {
+          traceLogger.fatal('worker ' + i + ': ' + chunk);
+        });
         worker.on('message', arg => {
           if (this.eventListener) {
             this.eventListener.forEach(({ eventName, callback }) => {

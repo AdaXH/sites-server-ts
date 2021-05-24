@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { logger, PROCESS_EVENT } from '@/common';
 import mongoose from 'mongoose';
 
@@ -13,7 +12,6 @@ export class Database {
   time = 0;
 
   async init(host?: string): Promise<void> {
-    console.log('init', host || this.host);
     await mongoose.connect(host || this.host);
     logger.info('connected db');
   }
@@ -24,11 +22,8 @@ export class Database {
     } catch (error) {
       logger.error(`db error ${error}`);
       this.time += 1;
-      console.log('this.time', this.time);
-      console.log('this.max', Database.max);
       if (this.time >= Database.max) {
         logger.error('max connect times');
-        console.log('times', Database.max);
         this.setTime(0);
         process.send({ pid: process.pid, eventName: PROCESS_EVENT.RELOAD_DB });
         return;

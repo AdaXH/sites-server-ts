@@ -4,16 +4,18 @@ import { Context } from 'koa';
 import { logger } from '@/common';
 
 log4js.configure({
+  pm2: true,
+  pm2InstanceVar: 'NODE_APP_INSTANCE',
   appenders: {
     trace: {
-      type: 'file',
-      filename: `logs/trace.log`,
+      type: 'datefile',
+      filename: 'logs/trace.log',
       maxLogSize: '2048K',
       daysToKeep: 2,
     },
     error: {
-      type: 'file',
-      filename: `logs/error.log`,
+      type: 'datefile',
+      filename: 'logs/error.log',
       maxLogSize: '2048K',
       daysToKeep: 2,
     },
@@ -25,8 +27,13 @@ log4js.configure({
   },
 });
 
-const traceLogger = log4js.getLogger('trace');
+export const traceLogger = log4js.getLogger('trace');
 const errorLogger = log4js.getLogger('error');
+
+console.log('test');
+traceLogger.fatal('test');
+traceLogger.info('test');
+traceLogger.debug('test');
 
 export default async function (ctx: Context, next: VoidFunction): Promise<void> {
   const start = Date.now();
