@@ -18,7 +18,7 @@ export class Process {
 
   init(): void {
     if (cluster.isMaster) {
-      for (let i = 0; i < 1; i += 1) {
+      for (let i = 0; i < this.maxProcess; i += 1) {
         const worker = cluster.fork();
         worker.on('message', arg => {
           if (this.eventListener) {
