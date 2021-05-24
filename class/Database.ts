@@ -2,7 +2,7 @@ import { logger, PROCESS_EVENT } from '@/common';
 import mongoose from 'mongoose';
 
 export class Database {
-  static max = 1;
+  static max = 10;
 
   constructor(host?: string) {
     this.host = host;

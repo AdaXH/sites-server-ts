@@ -21,12 +21,7 @@ export class Process {
     if (cluster.isMaster) {
       for (let i = 0; i < this.maxProcess; i += 1) {
         const worker = cluster.fork();
-        worker.process.stdout.on('data', function (chunk) {
-          traceLogger.fatal('worker ' + i + ': ' + chunk);
-        });
-        worker.process.stderr.on('data', function (chunk) {
-          traceLogger.fatal('worker ' + i + ': ' + chunk);
-        });
+        setLog(worker);
         worker.on('message', arg => {
           if (this.eventListener) {
             this.eventListener.forEach(({ eventName, callback }) => {
@@ -44,6 +39,7 @@ export class Process {
       }
       cluster.on('exit', (worker, code, sign) => {
         const newWorker = cluster.fork();
+        setLog(newWorker);
         logger.warning(`process exit whitd code: ${code}, sing: ${sign}, now loading`);
         const newWorkes = this.workers
           .filter(item => worker.process.pid !== item.pid)
@@ -69,4 +65,13 @@ interface WorkerFace {
 interface eventFunction {
   eventName: string;
   callback: (arg?: unknown) => void | Promise<unknown>;
+}
+
+function setLog(worker: Worker | any): void {
+  worker.process?.stdout?.on('data', chunk => {
+    traceLogger.fatal('worker:' + chunk);
+  });
+  worker.process?.stderr?.on('data', chunk => {
+    traceLogger.error('worker:' + chunk);
+  });
 }

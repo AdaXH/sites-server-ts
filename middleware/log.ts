@@ -30,11 +30,6 @@ log4js.configure({
 export const traceLogger = log4js.getLogger('trace');
 const errorLogger = log4js.getLogger('error');
 
-console.log('test');
-traceLogger.fatal('test');
-traceLogger.info('test');
-traceLogger.debug('test');
-
 export default async function (ctx: Context, next: VoidFunction): Promise<void> {
   const start = Date.now();
   await next();
@@ -50,10 +45,9 @@ export default async function (ctx: Context, next: VoidFunction): Promise<void> 
   const targetLogger = success ? traceLogger : errorLogger;
   const responseStr = JSON.stringify(responseBody);
   const traceId = responseBody.traceId || '';
-  const log = `${traceId} ${method} ${url} ${Date.now() - start}ms
-  req: ${reqString}
-  res: ${responseStr}
-  `;
+  const log = `${traceId} ${method} ${url} ${
+    Date.now() - start
+  }ms req: ${reqString} res: ${responseStr}`;
   targetLogger.fatal(log);
   if (!success) {
     logger.error(log);
