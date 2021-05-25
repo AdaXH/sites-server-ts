@@ -28,11 +28,12 @@ export class Server extends Application {
 
   async init(): Promise<void> {
     this.app = new Application();
+    this.app.keys = ['some secret for session'];
     this.app.env = getEnv();
 
     this.middlewares = await loadMiddleware(this.config.middlewarePath);
     this.controllers = await loadController(this.config.controllerPath);
-    this.plugins = await loadPlugin();
+    this.plugins = await loadPlugin(this.app);
 
     await this.useMiddleware();
     this.registerPlugin();

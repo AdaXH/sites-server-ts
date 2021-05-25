@@ -11,7 +11,11 @@ export const logger = {
     );
   },
   error: (data: unknown): void => {
-    console.log(`${chalk.bgRed('[ERROR]')} ${chalk.whiteBright(logData(data))}`);
+    console.log(
+      `${chalk.bgRgb(245, 115, 115).black('[ERROR]')} ${chalk.whiteBright(
+        logData(data),
+      )}`,
+    );
   },
 };
 

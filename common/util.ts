@@ -1,8 +1,10 @@
-import { Context } from 'koa';
+import Application, { Context } from 'koa';
 import * as fs from 'fs';
 import BodyParser from 'koa-body';
 import Json from 'koa-json';
 import jwt from 'jsonwebtoken';
+import session from 'koa-session';
+import chalk from 'chalk';
 import User from '@/entity/User';
 import { CommonObj } from '@/typings';
 import { CommonResponse, BizError, ErrorCodeEnum } from '@/class';
@@ -12,10 +14,9 @@ import {
   QUERY_ITEM_META_KEY,
   QUERY_META_KEY,
   TOKEN_META_KEY_PREFIX,
+  logger,
+  Validate,
 } from '.';
-import { Validate } from './dependencyInject';
-import { logger } from './winston';
-import chalk from 'chalk';
 
 function getJWTPayload(token) {
   // 验证并解析JWT
@@ -147,7 +148,7 @@ export function getEnv(): string {
  * 加载插件
  * @returns
  */
-export function loadPlugin(): VoidFunction[] {
+export function loadPlugin(app: Application): VoidFunction[] {
   return [
     BodyParser({
       jsonLimit: '9mb',
@@ -155,6 +156,17 @@ export function loadPlugin(): VoidFunction[] {
       textLimit: '9mb',
     }),
     new Json(),
+    session(
+      {
+        key: 'session_key',
+        renew: true,
+        maxAge: 172800000,
+        beforeSave: (_, session) => {
+          logger.info(session);
+        },
+      },
+      app,
+    ),
   ];
 }
 

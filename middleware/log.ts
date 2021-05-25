@@ -2,6 +2,7 @@ import { CommonObj } from '@/typings';
 import log4js from 'log4js';
 import { Context } from 'koa';
 import { logger } from '@/common';
+import chalk from 'chalk';
 
 log4js.configure({
   pm2: true,
@@ -45,11 +46,15 @@ export default async function (ctx: Context, next: VoidFunction): Promise<void> 
   const targetLogger = success ? traceLogger : errorLogger;
   const responseStr = JSON.stringify(responseBody);
   const traceId = responseBody.traceId || '';
-  const log = `${traceId} ${method} ${url} ${
-    Date.now() - start
-  }ms req: ${reqString} res: ${responseStr}`;
+  const log = `${chalk.bgBlue(traceId)} ${chalk.blue(method)} ${chalk.green(
+    url,
+  )} ${chalk.green(
+    Date.now() - start + 'ms',
+  )} ${`req: ${reqString} res: ${responseStr}`} `;
   targetLogger.fatal(log);
   if (!success) {
     logger.error(log);
+  } else {
+    logger.info(log);
   }
 }
