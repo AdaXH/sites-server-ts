@@ -8,6 +8,11 @@ export default async function (ctx: CommonObj, next: VoidFunction): Promise<void
     const { body } = ctx;
     const traceId = uuid();
     ctx.set('Trace-id', traceId);
+    if (!body) {
+      // 404
+      ctx.body = `not found, with requestId: ${traceId}`;
+      return;
+    }
     ctx.body = { ...JSON.parse(body || '{}'), traceId, pid: process.pid };
   } catch (error) {
     ctx.body = CommonResponse.error(error);

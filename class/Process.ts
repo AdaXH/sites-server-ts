@@ -11,10 +11,16 @@ export class Process {
   private callback: VoidFunction;
   private eventListener: eventFunction[];
 
-  constructor(callback: VoidFunction, eventListener: eventFunction[]) {
+  public setCallback(callback: VoidFunction): void {
     this.callback = callback;
+  }
+
+  public setMaxProcess(maxProcess: number): void {
+    this.maxProcess = maxProcess;
+  }
+
+  public setEventListener(eventListener: eventFunction[]): void {
     this.eventListener = eventListener;
-    this.init();
   }
 
   init(): void {

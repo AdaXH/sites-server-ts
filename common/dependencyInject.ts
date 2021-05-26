@@ -5,7 +5,6 @@ import {
   QUERY_ITEM_META_KEY,
   BODY_META_KEY,
   TOKEN_META_KEY_PREFIX,
-  CTX_META_KEY_PREFIX,
 } from '.';
 
 type DecratorReturn = (target: unknown, propertyName: string, index?: number) => void;
@@ -113,14 +112,5 @@ export function TokenValidate(
       validate,
       target[propertyName],
     );
-  };
-}
-
-/**
- * 注入ctx
- */
-export function Ctx() {
-  return (targer: unknown, propertyName: string, index?: number): void => {
-    Reflect.defineMetadata(CTX_META_KEY_PREFIX, index, targer[propertyName]);
   };
 }

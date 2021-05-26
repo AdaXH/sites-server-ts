@@ -1,4 +1,5 @@
 import { BizError, ErrorCodeEnum } from '@/class';
+import { parseToken } from '@/common';
 import UserInstance from '@/entity/User';
 import { User } from '@/entity/User/interface';
 import { CommonObj } from '@/typings';
@@ -24,7 +25,7 @@ export default class UserService implements UserServiceImpl {
    */
   public async queryByUserId(userId: string): Promise<User> {
     if (!userId) {
-      throw new BizError('用户缺少参数：id', ErrorCodeEnum.REQUIRED_ARGUMENUT);
+      throw new BizError('用户缺少参数：userId', ErrorCodeEnum.REQUIRED_ARGUMENUT);
     }
 
     const user = UserInstance.findOne({ userId }, { password: 0, _id: 0, __v: 0 });
@@ -72,5 +73,17 @@ export default class UserService implements UserServiceImpl {
       new: true,
     });
     return updateUser;
+  }
+
+  /**
+   * 根据token查询用户信息
+   * @param token
+   */
+  async getUserInfo(token: string): Promise<User> {
+    if (!token) {
+      throw new BizError('token不存在', ErrorCodeEnum.REQUIRED_ARGUMENUT);
+    }
+    const { userId }: CommonObj = parseToken(token);
+    return this.queryByUserId(userId);
   }
 }

@@ -6,6 +6,7 @@ import {
   loadMiddleware,
   logger,
   PROCESS_EVENT,
+  ENV,
 } from '@/common';
 import { ServerConfig } from '@/typings';
 import { Database, DatabaseInstance, Process } from '.';
@@ -80,14 +81,22 @@ export class Server extends Application {
    * 启动服务
    */
   async startServer(): Promise<void> {
-    new Process(async () => {
+    const processInstance = new Process();
+
+    if (getEnv() === ENV.DEV) {
+      processInstance.setMaxProcess(1);
+    }
+
+    processInstance.setCallback(async () => {
       await this.init();
       const { env } = this.app;
       const { host, port } = this.config.bootConfig[env];
       this.db.connect(host);
       this.app.listen(port);
       logger.info(`web server on ${port} at process: ${process.pid}`);
-    }, [
+    });
+
+    processInstance.setEventListener([
       {
         eventName: PROCESS_EVENT.RELOAD_DB,
         callback: async () => {
@@ -97,5 +106,7 @@ export class Server extends Application {
         },
       },
     ]);
+
+    processInstance.init();
   }
 }

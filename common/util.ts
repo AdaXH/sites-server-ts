@@ -18,7 +18,7 @@ import {
   Validate,
 } from '.';
 
-function getJWTPayload(token) {
+export function getJWTPayload(token: string): unknown {
   // 验证并解析JWT
   if (!token) return;
   return jwt.verify(token, 'secret');
@@ -29,7 +29,7 @@ export function parseToken(authorization: string): unknown {
     if (!tokenParse) throw new BizError('你还没有登陆噢~', ErrorCodeEnum.NEED_LOGIN);
     return tokenParse;
   } catch (error) {
-    throw new BizError('鉴权失败，请重新登录', ErrorCodeEnum.PERMISSION_DENIED, error);
+    throw new BizError('鉴权失败，请重新登录', ErrorCodeEnum.PERMISSION_DENIED);
   }
 }
 
@@ -71,6 +71,7 @@ export async function loadController(controllerPath: string): Promise<unknown[]>
     const Controller = await import(`${controllerPath}/${item}`);
     const instance = new Controller.default();
     const property = Object.getPrototypeOf(instance);
+    console.log('property', property);
     const fnNames = Object.getOwnPropertyNames(property).filter(
       item => item !== 'constructor' && typeof property[item] === 'function',
     );
@@ -89,6 +90,7 @@ export async function loadController(controllerPath: string): Promise<unknown[]>
               headers: { authorization },
             } = ctx;
             const target = property[fn];
+            property.ctx = ctx;
             // 获取param参数信息元数据 - restful
             const paramData = Reflect.getMetadata(PARAM_META_KEY, target);
             const args = [];

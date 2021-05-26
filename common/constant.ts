@@ -33,3 +33,8 @@ export enum PROCESS_EVENT {
   'CLOSE' = 'CLOSE',
   'RELOAD_DB' = 'RELOAD_DB',
 }
+
+export enum ENV {
+  'DEV' = 'development',
+  'PROD' = 'production',
+}

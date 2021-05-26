@@ -7,4 +7,5 @@ export default interface UserServiceImpl {
   register: (user: User) => Promise<User>;
   queryMyBasicInfo: (userId: string) => Promise<CommonObj>;
   updateUser: (userId: string, updateDto: CommonObj) => Promise<User>;
+  getUserInfo: (token: string) => Promise<User>;
 }
