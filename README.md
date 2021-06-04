@@ -15,6 +15,7 @@
 > Participate, and you will appear in the developer list
 
 [![DeepScan grade](https://deepscan.io/api/teams/13594/projects/16596/branches/359188/badge/grade.svg?token=a1fa0980263b30233c0ddf1e9c3ed778290db2ee)](https://deepscan.io/dashboard#view=project&tid=13594&pid=16596&bid=359188)
+[![Build Status](https://travis-ci.org/AdaXH/sites-server-ts.svg?branch=main)](https://travis-ci.org/AdaXH/sites-server-ts)
 
 ## 这是什么仓库
 
